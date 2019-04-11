@@ -15,10 +15,12 @@
 !.git*
 !*.md
 !*.yml
+!*.sh
 
 # Building files
 !Makefile
 !*.mk
+!configure
 
 # Source files
 !*.h

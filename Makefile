@@ -14,24 +14,37 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#  This makefile is more or less generic.
+#  The configuration is on `sources.mk`.
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+topdir ?= $(shell readlink -f $(dir $(word 1,$(MAKEFILE_LIST))))
+gendir ?= $(shell pwd)
 
-CFLAGS += -Wall -Wextra -Wno-unused-parameter -Wno-char-subscripts
-CFLAGS += -Wno-multichar -Wno-implicit-fallthrough
-CFLAGS += -fno-builtin -ffreestanding -fPIC -nostartfiles
-CFLAGS += -D_DATE_=\"'$(DATE)'\" -D_GITH_=\"'$(GIT)'\"
+include $(topdir)/make/global.mk
 
-$(krndir) = $(topdir)/../../kernel
-__CFLAGS = $(CFLAGS)
-__CFLAGS += -I $(krndir)/include
-__CFLAGS += -I $(krndir)/arch/$(target_arch)/include
-__CFLAGS += -I $(krndir)/os/$(target_os)
+subdirs = $(filter-out $(topdir)/make/.,$(wildcard $(topdir)/*/.))
 
-$(name)_src-y = $(src-y)
-$(eval $(call ccpl,_))
-DEPS += $(call obj,_,$(name),d)
-objs = $(call obj,_,$(name),o)
+all: drivers libs bins
 
-$(libdir)/$(name).km:: $(objs)
-	$(S) mkdir -p $(dir $@)
-	$(Q) echo "    LD  "$@
-	$(V) $(CC) --shared $(LFLAGS) -o $@ $(objs)
+
+install: install-all
+
+CFLAGS += -Wall -Wextra -fPIC
+CFLAGS += -Wno-unused-parameter -Dmain=_main
+
+include $(topdir)/make/build.mk
+include $(topdir)/make/drivers.mk
+
+include $(foreach dir,$(subdirs),$(dir)/Makefile)
+
+
+drivers: $(DRVS)
+libs: $(LIBS)
+bins: $(BINS)
+install-all: $(patsubst %,install-%,$(DRVS) $(LIBS) $(BINS))
+
+
+ifeq ($(NODEPS),)
+include $(call fn_deps,SRCS)
+endif
+

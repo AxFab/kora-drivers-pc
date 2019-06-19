@@ -31,6 +31,7 @@ install: install-all
 
 CFLAGS += -Wall -Wextra -fPIC
 CFLAGS += -Wno-unused-parameter -Dmain=_main
+CFLAGS += -ggdb
 
 include $(topdir)/make/build.mk
 include $(topdir)/make/drivers.mk

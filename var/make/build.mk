@@ -14,22 +14,21 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-#  This makefile is more or less generic.
-#  The configuration is on `sources.mk`.
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#  This makefile is generic.
+#
 define fn_objs
-	$(patsubst $(srcdir)/%.c,$(outdir)/%.o,$(patsubst $(srcdir)/%.$(ASM_EXT),$(outdir)/%.o,$($(1))))
+	$(patsubst $(topdir)/%.c,$(outdir)/%.o,$(patsubst $(topdir)/%.$(ASM_EXT),$(outdir)/%.o,$($(1))))
 endef
 define fn_deps
-	$(patsubst $(srcdir)/%.c,$(outdir)/%.d,$($(1)))
+	$(patsubst $(topdir)/%.c,$(outdir)/%.d,$(patsubst $(topdir)/%.$(ASM_EXT),,$($(1))))
 endef
 
-$(outdir)/%.o: $(srcdir)/%.c
+$(outdir)/%.o: $(topdir)/%.c
 	$(S) mkdir -p $(dir $@)
 	$(Q) echo "    CC  $<"
 	$(V) $(CC) -c -o $@ $< $(CFLAGS)
 
-$(outdir)/%.d: $(srcdir)/%.c
+$(outdir)/%.d: $(topdir)/%.c
 	$(S) mkdir -p $(dir $@)
 	$(Q) echo "    CM  $<"
 	$(V) $(CC) -M -o $@ $< $(CFLAGS)
@@ -50,8 +49,8 @@ $(1): $(bindir)/$(1)
 install-$(1): $(prefix)/bin/$(1)
 $(bindir)/$(1): $(call fn_objs,$(2)-y)
 	$(S) mkdir -p $$(dir $$@)
-	$(Q) echo "   LD  $$@"
-	$(V) $(CC) -o $$@ $$^ $($(3))
+	$(Q) echo "    LD  $$@"
+	$(V) $(LDC) -o $$@ $$^ $($(3))
 endef
 
 clean:
@@ -69,5 +68,4 @@ $(prefix)/bin/%: $(bindir)/%
 
 
 .PHONY: clean
-
 

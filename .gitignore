@@ -6,25 +6,37 @@
 # We use a BLACK-LIST for folders
 [Bb]in/
 [Oo]bj/
-[Ll]ib/
+[Cc]overage/
+[Cc]ov_*/
+[Bb]uild*/
+[Tt]ools/
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # We use a WHITE-LIST for files
 
 # Repository files
 !.git*
+!.gdbinit
 !*.md
-!*.yml
-!*.sh
 
 # Building files
 !Makefile
-!*.mk
 !configure
+!*.mk
+!*.sh
+!*.yml
 
 # Source files
 !*.h
 !*.c
+!*.[Ss]
 !*.asm
-!*.s
+
+# Ressouces
+!var/*
+!resx/**/*
+
+# Visual studio
+!vs/*.sln
+!vs/*.vcxproj.*
 

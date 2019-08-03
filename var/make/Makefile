@@ -14,36 +14,45 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-#  This makefile is more or less generic.
-#  The configuration is on `sources.mk`.
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 topdir ?= $(shell readlink -f $(dir $(word 1,$(MAKEFILE_LIST))))
 gendir ?= $(shell pwd)
 
 include $(topdir)/var/make/global.mk
+# srcdir = $(topdir)/src
 
-all: drivers libs bins
+all: libname
+install: $(prefix)/lib/libname.so
 
-install: install-all
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-CFLAGS += -Wall -Wextra -fPIC
-CFLAGS += -Wno-unused-parameter -Dmain=_main
-CFLAGS += -ggdb
+CFLAGS ?= -Wall -Wextra -Wno-unused-parameter -ggdb
+CFLAGS += -I$(topdir)/include -fPIC
+
+# SRCS-y += $(wildcard $(srcdir)/dir/*.c)
+# SRCS-y += $(wildcard $(srcdir)/$(DISTO)/*.c)
 
 include $(topdir)/var/make/build.mk
-include $(topdir)/var/make/drivers.mk
+# include $(topdir)/arch/$(target_arch)/make.mk
 
-DRV = ac97 ata e1000 ps2 vga
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-include $(foreach dir,$(DRV),$(topdir)/$(dir)/Makefile)
+# DISTO ?= my-disto
 
-drivers: $(DRVS)
-libs: $(LIBS)
-bins: $(BINS)
-install-all: $(patsubst %,install-%,$(DRVS) $(LIBS) $(BINS))
-
-
-ifeq ($(NODEPS),)
--include $(call fn_deps,SRCS)
+ifeq ($(DISTO),A)
+LFLAGS += -lA
+else ifeq ($(DISTO),B)
+LFLAGS += -lB
+else ifeq ($(DISTO),C)
+CFLAGS += -Dname=C
+LFLAGS += -lC
 endif
 
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+$(eval $(call link_shared,name,SRCS,LFLAGS))
+
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+ifeq ($(NODEPS),)
+include $(call fn_deps, SRCS)
+endif

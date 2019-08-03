@@ -12,8 +12,8 @@ EOF
 
 TOPDIR=$(readlink -f `dirname ${BASH_SOURCE[0]}`)
 GENDIR=`pwd`
-PREFIX=$GENDIR
-TARGET=`$TOPDIR/make/host.sh || true`
+PREFIX='/usr/local'
+TARGET=`$TOPDIR/var/make/host.sh || true`
 if [ "$TOPDIR" == "$GENDIR" ]; then
     echo "This script doesn't allow to persist build parameters on source folder" >&2
     echo "Please build on another directory" >&2
@@ -23,39 +23,40 @@ fi
 
 while (( $# > 0 )); do
     case $1 in
-        --target=*) TARGET=`$TOPDIR/make/host.sh ${1:9} || true` ;;
+        --target=*) TARGET=`$TOPDIR/var/make/host.sh ${1:9} || true` ;;
         --prefix=*) PREFIX=`readlink -f ${1:9}` ;;
         *) HELP; exit 1 ;;
     esac
-	shift
+    shift
 done
 
-if [ "$TARGET" != "`$TOPDIR/make/host.sh`" ]; then
+CC='gcc'
+if [ "$TARGET" != "`$TOPDIR/var/make/host.sh`" ]; then
     CROSS="$TARGET-"
     IFS='-' read -ra THST <<< "$TARGET"
     T_ARCH=${THST[0]}
     T_OS=${THST[@]:2:${#THST[@]}}
     # echo "Arch: $T_ARCH - Os: $T_OS"
-    GCC=`which "$CROSS"gcc 2> /dev/null || true`
-    if [ -z $GCC ]; then
+    CC=`which "$CROSS"gcc 2> /dev/null || true`
+    if [ -z $CC ]; then
         CROSS="$T_ARCH-$T_OS-"
-        GCC=`which "$CROSS"gcc 2> /dev/null || true`
+        CC=`which "$CROSS"gcc 2> /dev/null || true`
     fi
-    if [ -z $GCC ]; then
+    if [ -z $CC ]; then
         CROSS="$TOPDIR/usr/bin/$T_ARCH-$T_OS-"
-        GCC=`which "$CROSS"gcc 2> /dev/null || true`
+        CC=`which "$CROSS"gcc 2> /dev/null || true`
     fi
-    if [ -z $GCC ]; then
+    if [ -z $CC ]; then
         CROSS="$GENDIR/usr/bin/$T_ARCH-$T_OS-"
-        GCC=`which "$CROSS"gcc 2> /dev/null || true`
+        CC=`which "$CROSS"gcc 2> /dev/null || true`
     fi
-    if [ -z $GCC ]; then
+    if [ -z $CC ]; then
         CROSS="$GENDIR/bin/$T_ARCH-$T_OS-"
-        GCC=`which "$CROSS"gcc 2> /dev/null || true`
+        CC=`which "$CROSS"gcc 2> /dev/null || true`
     fi
-    if [ -z $GCC ]; then
+    if [ -z $CC ]; then
         echo "Unable to find the toolchain for target $TARGET" >&2
-        exit 1
+        CC='gcc'
     fi
 fi
 
@@ -64,8 +65,6 @@ topdir:=$TOPDIR
 gendir:=$GENDIR
 prefix:=$PREFIX
 target:=$TARGET
-CROSS:=$CROSS
-CC=:gcc
+CC:=$CC
 include $TOPDIR/Makefile
 EOF
-

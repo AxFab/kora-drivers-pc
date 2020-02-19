@@ -20,7 +20,7 @@
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # Parse first argument if provided
-if [ -n $1 ]; then
+if [ -n "$1" ]; then
     IFS='-' read -ra THST <<< "$1"
     arch=${THST[0]}
     vendor=${THST[1]}
@@ -44,6 +44,10 @@ case "$arch" in
         ;;
     armv7l)
         arch=arm
+        vendor=phone
+        ;;
+    aarch64)
+        arch=aarch64
         vendor=phone
         ;;
     *)

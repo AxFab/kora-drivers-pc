@@ -17,9 +17,10 @@
 #  This makefile is generic.
 
 define link_driver
-DRVS += $(1)
-$(1): $(libdir)/$(1).km $(libdir)/lk$(1).a
-$(libdir)/$(1).km: $(call fn_objs,$(1)_SRCS-y)
+DRVS += $(libdir)/$(1).ko
+INSTALL_DRVS += $(prefix)/boot/mods/$(1).ko
+$(1): $(libdir)/$(1).ko $(libdir)/lk$(1).a
+$(libdir)/$(1).ko: $(call fn_objs,$(1)_SRCS-y)
 	$(S) mkdir -p $$(dir $$@)
 	$(Q) echo "    LD  $$@"
 	$(V) $(LD) -shared -o $$@ $$^ $($(1)_LFLAGS)
@@ -27,23 +28,24 @@ $(libdir)/lk$(1).a: $(call fn_objs,$(1)_SRCS-y)
 	$(S) mkdir -p $$(dir $$@)
 	$(Q) echo "    AR  $$@"
 	$(V) $(AR) rc $$@ $$^
-install-$(1): $(prefix)/lib/drivers/$(1).km
-$(prefix)/lib/drivers/$(1).km: $(libdir)/$(1).km
-	$(S) mkdir -p $$(dir $$@))
+$(prefix)/boot/mods/$(1).ko: $(libdir)/$(1).ko
+	$(S) mkdir -p $$(dir $$@)
+	$(Q) echo "    INSTALL  $$@"
 	$(V) $(INSTALL) $$< $$@
 .PHONY:$(1)
 endef
 
 define link_sbin
-BINS += $(1)
+BINS += $(bindir)/$(1)
+INSTALL_BINS += $(prefix)/sbin/$(1)
 $(1): $(bindir)/$(1)
 $(bindir)/$(1): $(call fn_objs,$(1)_SRCS-y)
 	$(S) mkdir -p $$(dir $$@)
 	$(Q) echo "    LD  $$@"
 	$(V) $(CC) -o $$@ $$^ $($(1)_LFLAGS)
-install-$(1): $(prefix)/sbin/$(1)
 $(prefix)/sbin/$(1): $(bindir)/$(1)
 	$(S) mkdir -p $$(dir $$@)
+	$(Q) echo "    INSTALL  $$@"
 	$(V) $(INSTALL) $$< $$@
 endef
 

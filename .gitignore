@@ -10,6 +10,7 @@
 [Cc]ov_*/
 [Bb]uild*/
 [Tt]ools/
+[Dd]ebug/
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # We use a WHITE-LIST for files
@@ -33,7 +34,6 @@
 !*.asm
 
 # Ressouces
-!var/*
 !resx/**/*
 
 # Visual studio

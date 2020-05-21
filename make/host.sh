@@ -15,9 +15,7 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-#  This makefile is more or less generic.
-#  The configuration is on `sources.mk`.
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#  This build script is generic.
 
 # Parse first argument if provided
 if [ -n "$1" ]; then
@@ -78,8 +76,11 @@ case "$os" in
     kora)
         os=kora
         ;;
+    [Mm]sys|win32)
+        os='win32'
+        ;;
     *)
-        echo "Unsupported platform " >&2
+        echo "Unsupported platform $os" >&2
         exit 1
         ;;
 esac

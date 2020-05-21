@@ -15,9 +15,7 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-#  This makefile is more or less generic.
-#  The configuration is on `sources.mk`.
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#  This build script is generic.
 
 set -e
 
@@ -27,15 +25,15 @@ Usage: configure [OPTIONS]
 with options:
     --target=TARGET     Triplet of the destination platform
     --prefix=PREFIX     Destination of final delivery
-    --sysdir=SYSDIR     Destination of final delivery
+    --sysdir=SYSDIR     Repository of installed tools dependencies
 EOF
 }
 
 TOPDIR=$(readlink -f `dirname ${BASH_SOURCE[0]}`)
 GENDIR=`pwd`
 PREFIX='/usr/local'
-SYSDIR='/usr'
-TARGET=`$TOPDIR/make/host.sh || true`
+SYSDIR=''
+TARGET=`$TOPDIR/make/host.sh`
 if [ "$TOPDIR" == "$GENDIR" ]; then
     echo "This script doesn't allow to persist build parameters on source folder" >&2
     echo "Please build on another directory" >&2
@@ -45,7 +43,7 @@ fi
 
 while (( $# > 0 )); do
     case $1 in
-        --target=*) TARGET=`$TOPDIR/make/host.sh ${1:9} || true` ;;
+        --target=*) TARGET=`$TOPDIR/make/host.sh ${1:9}` ;;
         --prefix=*) PREFIX=`readlink -f ${1:9}` ;;
         --sysdir=*) SYSDIR=`readlink -f ${1:9}` ;;
         *) HELP; exit 1 ;;
@@ -74,14 +72,25 @@ if [ "$TARGET" != "`$TOPDIR/make/host.sh`" ]; then
             5)
                 CROSS=''; CC='';
                 echo "Unable to find toolchain for target $TARGET"  >&2
-                break ;;
+                exit 1 ;;
         esac
         # echo 'Try '"$CROSS$CC"
         i=`expr $i + 1`
     done
 fi
 
+
 cat > Makefile << EOF
+# Configure script for $TOPDIR
+EOF
+
+# Resolve dependencies
+if [ -n "$SYSDIR" ]; then
+    echo "pkgdir:=$SYSDIR" >> Makefile
+    cat "$TOPDIR/Makefile" | grep 'ifneq ($(.*_HOME),)' | sed 's/ifneq ($(\(.*_HOME\)),)/\1:=${pkgdir}/' >> Makefile
+fi
+
+cat >> Makefile << EOF
 topdir:=$TOPDIR
 gendir:=$GENDIR
 prefix:=$PREFIX
